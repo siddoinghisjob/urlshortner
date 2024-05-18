@@ -53,7 +53,7 @@ func dotENVInt(key string) int {
 var ctx = context.Background()
 
 type analyticsStore struct {
-	uid        int
+	url        string
 	name, date string
 }
 

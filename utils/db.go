@@ -67,15 +67,23 @@ func getFromPg(link string) (string, error) {
 	return "", &internalError{"Internal Error"}
 }
 
-func setClicksInPG(uid int8, name string, date string) error {
+func setClicksInPG(url string, name string, date string) error {
 	cid, err := setCountryInPG(name)
+	if err != nil {
+		return &internalError{}
+	}
+	var uid int
+	err = DB.QueryRow("SELECT id FROM urls WHERE link = $1", url).Scan(&uid)
+
+	if err == sql.ErrNoRows {
+		return nil
+	}
 	if err != nil {
 		return &internalError{}
 	}
 
 	_, err = DB.Exec("INSERT INTO clicks (uid, cid, date) VALUES ($1,$2,$3) returning id", uid, cid, date)
 
-	fmt.Println(err)
 	if err != nil {
 		return &internalError{}
 	}
