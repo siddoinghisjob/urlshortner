@@ -15,7 +15,7 @@ func setupLogger(db *sql.DB) *analyticsLogger {
 func (l *analyticsLogger) store(url, name, date string) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
-	fmt.Println(date)
+
 	var uid int
 	err := l.db.QueryRow("SELECT id from urls where link = $1", url).Scan(&uid)
 	if err != nil {

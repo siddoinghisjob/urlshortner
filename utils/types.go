@@ -63,8 +63,9 @@ type analyticsLogger struct {
 	buffer []analyticsStore
 }
 
-type countryVal struct {
-	Name string `json:"country"`
+type analyticsData struct {
+	Name string `json:"name"`
+	Data int    `json:"data"`
 }
 
 var Client = redis.NewClient(&redis.Options{

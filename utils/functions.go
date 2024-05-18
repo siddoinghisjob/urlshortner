@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -40,33 +39,10 @@ func Post(c *gin.Context) {
 
 }
 
-func country(ip string) string {
-	var cname countryVal
-
-	resp, err := http.Get(fmt.Sprintf("https://api.country.is/%s", ip))
-
-	if err != nil {
-		return "NA"
-	}
-	defer resp.Body.Close()
-
-	fmt.Println(ip)
-	if resp.StatusCode != http.StatusAccepted {
-		return "NA"
-	}
-	err = json.NewDecoder(resp.Body).Decode(&cname)
-
-	if err != nil {
-		return "NA"
-	}
-
-	return cname.Name
-}
-
 func Get(c *gin.Context) {
 	url, err := searchFromDB(c.Param("id"))
 
-	countryName := country(c.ClientIP())
+	countryName := c.DefaultQuery("c", "NA")
 
 	if _, ok := err.(*internalError); ok {
 		c.IndentedJSON(http.StatusInternalServerError, message{Text: "Internal Error", Error: true})
@@ -107,7 +83,7 @@ func Analytics(c *gin.Context) {
 	totalVisitors := getTotalVis(id)
 	countryData := getTotalCountry(id)
 	dateData := getTotalDate(id)
-	fmt.Println(totalVisitors)
+
 	c.JSON(http.StatusOK, gin.H{
 		"total_visitors": totalVisitors,
 		"country_data":   countryData,

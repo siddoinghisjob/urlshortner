@@ -79,7 +79,7 @@ func setClicksInPG(uid int8, name string, date string) error {
 	if err != nil {
 		return &internalError{}
 	}
-	fmt.Println("Done..")
+
 	return nil
 }
 
@@ -113,8 +113,7 @@ func getTotalVis(id int) int {
 	return totalVisitors
 }
 
-func getTotalCountry(id int) (countryData map[string]int) {
-	countryData = make(map[string]int)
+func getTotalCountry(id int) (countryData []analyticsData) {
 	rows, err := DB.Query("SELECT c.name, COUNT(v.uid) AS visitors_count FROM clicks v JOIN country c ON v.cid = c.id WHERE uid = $1 GROUP BY c.name ORDER BY visitors_count DESC LIMIT 3", id)
 	if err != nil {
 		return
@@ -127,13 +126,12 @@ func getTotalCountry(id int) (countryData map[string]int) {
 		if err != nil {
 			return
 		}
-		countryData[countryName] = visitorsCount
+		countryData = append(countryData, analyticsData{Name: countryName, Data: visitorsCount})
 	}
 	return
 }
 
-func getTotalDate(id int) (dateData map[string]int) {
-	dateData = make(map[string]int)
+func getTotalDate(id int) (dateData []analyticsData) {
 	rows, err := DB.Query("SELECT date, COUNT(*) AS visitors_count FROM clicks WHERE uid = $1 GROUP BY date ORDER BY visitors_count DESC LIMIT 5", id)
 	if err != nil {
 		return
@@ -148,7 +146,7 @@ func getTotalDate(id int) (dateData map[string]int) {
 			return
 		}
 		date = date[:len(date)-10]
-		dateData[date] = visitorsCount
+		dateData = append(dateData, analyticsData{Name: date, Data: visitorsCount})
 	}
 	return
 }
