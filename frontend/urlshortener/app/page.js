@@ -1,12 +1,12 @@
 import { Suspense } from "react";
-import Body from "./components/body";
+import HomeComp from "./components/home";
 
 
 export default function Home() {
 
   return (
     <Suspense>
-      <Body/>
+      <HomeComp/>
     </Suspense>
   );
 }

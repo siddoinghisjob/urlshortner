@@ -34,17 +34,32 @@ func hash(h int) string {
 }
 
 func setIntoPg(link string) (string, error) {
+	var surl string
 	var id int
-	err := DB.QueryRow("INSERT INTO urls (link) VALUES ($1) returning id", link).Scan(&id)
+	err := DB.QueryRow("SELECT id FROM urls WHERE link = $1", link).Scan(&id)
+	if err == sql.ErrNoRows {
+		err = DB.QueryRow("INSERT INTO urls (link) VALUES ($1) returning id", link).Scan(&id)
+		if err != nil {
+			fmt.Print("Error 43")
+			return "", &internalError{}
+		}
+		surl = hash(id)
 
+		_, err = DB.Exec("INSERT INTO surls (uid, surl) VALUES ($1,$2)", id, surl)
+
+		if err != nil {
+			fmt.Print("Error 51")
+			return "", &internalError{}
+		}
+		return surl, nil
+	}
 	if err != nil {
+		fmt.Print("Error 57")
 		return "", &internalError{}
 	}
-	surl := hash(id)
-
-	_, err = DB.Exec("INSERT INTO surls (uid, surl) VALUES ($1,$2)", id, surl)
-
+	err = DB.QueryRow("SELECT surl FROM surls WHERE uid = $1", id).Scan(&surl)
 	if err != nil {
+		fmt.Print("Error 62")
 		return "", &internalError{}
 	}
 	return surl, nil

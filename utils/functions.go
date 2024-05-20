@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,11 +24,19 @@ func Logging(ticker *time.Ticker) {
 	}()
 }
 
-func isValidURL(str string) bool {
-	pattern := `^(https?://)?(www\.)?[\w-]+\.[\w.-]+(/[\w-]+)*(\?\w+=\w+)?$`
-	regexpPattern := regexp.MustCompile(pattern)
+func trimURL(url *string) {
+	*url = strings.TrimPrefix(*url, "https://")
+	*url = strings.TrimPrefix(*url, "http://")
+	*url = strings.TrimPrefix(*url, "ftp://")
+	*url = strings.TrimPrefix(*url, "www.")
+}
 
-	return regexpPattern.MatchString(str)
+func isValidURL(str string) bool {
+	pattern := `^(?:https?|ftp):\/\/(?:www\.)?[\w\.-]+\.\w+(?:\/.*)?$`
+
+	regex := regexp.MustCompile(pattern)
+
+	return regex.MatchString(str)
 }
 
 func Post(c *gin.Context) {
@@ -36,10 +45,12 @@ func Post(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, message{Text: "Format not correct.", Error: true})
 		return
 	}
+	fmt.Println(uLink.URL)
 	if !isValidURL(uLink.URL) {
 		c.IndentedJSON(http.StatusBadRequest, message{Text: "Format not correct.", Error: true})
 		return
 	}
+	trimURL(&uLink.URL)
 	surl, err := storeInDB(uLink.URL)
 	if err != nil {
 		fmt.Println(err)
@@ -54,7 +65,6 @@ func Get(c *gin.Context) {
 	url, err := searchFromDB(c.Param("id"))
 
 	countryName := c.DefaultQuery("c", "NA")
-
 	if _, ok := err.(*internalError); ok {
 		c.IndentedJSON(http.StatusInternalServerError, message{Text: "Internal Error", Error: true})
 		return
@@ -109,9 +119,9 @@ func searchFromDB(surl string) (string, error) {
 	if notFoundErr || internalErr {
 		link, err := getFromPg(surl)
 		if _, ok := err.(*notFoundError); ok {
-			return link, &notFoundError{}
+			return link, &notFoundError{message: "not found"}
 		} else if _, ok := err.(*internalError); ok {
-			return link, &internalError{}
+			return link, &internalError{message: "internal error"}
 		}
 		return link, nil
 	} else if err == nil {
