@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"regexp"
 	"strconv"
 	"time"
@@ -25,8 +24,10 @@ func Logging(ticker *time.Ticker) {
 }
 
 func isValidURL(str string) bool {
-	u, err := url.Parse(str)
-	return err == nil && u.Scheme != "" && u.Host != ""
+	pattern := `^(https?://)?(www\.)?[\w-]+\.[\w.-]+(/[\w-]+)*(\?\w+=\w+)?$`
+	regexpPattern := regexp.MustCompile(pattern)
+
+	return regexpPattern.MatchString(str)
 }
 
 func Post(c *gin.Context) {
