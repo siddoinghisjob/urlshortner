@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"time"
@@ -23,13 +24,22 @@ func Logging(ticker *time.Ticker) {
 	}()
 }
 
+func isValidURL(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
 func Post(c *gin.Context) {
-	var url urlLink
-	if err := c.BindJSON(&url); err != nil {
+	var uLink urlLink
+	if err := c.BindJSON(&uLink); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, message{Text: "Format not correct.", Error: true})
 		return
 	}
-	surl, err := storeInDB(url.URL)
+	if !isValidURL(uLink.URL) {
+		c.IndentedJSON(http.StatusBadRequest, message{Text: "Format not correct.", Error: true})
+		return
+	}
+	surl, err := storeInDB(uLink.URL)
 	if err != nil {
 		fmt.Println(err)
 		c.IndentedJSON(http.StatusInternalServerError, message{Text: "Error. Could not process.", Error: true})

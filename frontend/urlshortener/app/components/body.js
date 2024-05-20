@@ -4,6 +4,8 @@ import { Josefin_Sans } from "next/font/google";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import Shorten from "./shorten";
+import Analytics from "./analytics";
 
 const font = Josefin_Sans({
   weight: ["300"],
@@ -32,27 +34,24 @@ export default function Body() {
             <div
               className={`bg-white ${
                 tab == "analytics"
-                  ? "-top-[5.1rem] border-b-0 z-10"
+                  ? "-top-[5.05rem] border-b-0 z-10"
                   : "-top-[5.2rem] border-b-1 z-0 bg-slate-50 text-slate-700"
-              } absolute rounded-t-xl p-5 py-2 border-2 border-collapse left-0`}
+              } absolute rounded-t-xl p-5 py-2 border-2 border-collapse md:left-0 left-5`}
             >
               <Link href="?tab=analytics">Analytics</Link>
             </div>
             <div
               className={`bg-white ${
                 tab != "analytics"
-                  ? "-top-[5.1rem] border-b-0 z-10"
+                  ? "-top-[5.05rem] border-b-0 z-10"
                   : "-top-[5.2rem] border-b-1 z-0 bg-slate-50 text-slate-700"
-              } absolute rounded-t-xl p-5 py-2 border-2 border-collapse right-0`}
+              } absolute rounded-t-xl p-5 py-2 border-2 border-collapse md:right-0 right-5`}
             >
               <Link href="?tab=shortener">Shortener</Link>
             </div>
           </div>
-          <input
-            type="text"
-            placeholder="Link to shorten"
-            className="border-2 rounded-2xl w-full py-3 px-5"
-          />
+          {tab != "analytics" && <Shorten />}
+          {tab == "analytics" && <Analytics />}
         </div>
       </div>
       <div className="w-full justify-center bg-black items-center flex flex-wrap gap-3 text-white p-5 h-full border-t-2">
