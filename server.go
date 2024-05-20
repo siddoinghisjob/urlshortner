@@ -32,5 +32,5 @@ func setupAPI() {
 	router.GET("/url/:id", utils.Get)
 	router.GET("/analytics/:id", utils.Analytics)
 
-	router.Run("localhost:1000")
+	router.Run()
 }

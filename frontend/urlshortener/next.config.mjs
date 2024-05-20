@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     env :{
-        BACKEND_URL : "http://localhost:1000",
-        FRONTEND_URL : "http://localhost:3000"
+        BACKEND_URL : "https://urlshortner-p173.onrender.com/",
+        FRONTEND_URL : "https://urlshortner-brgq.vercel.app/"
     }
 };
 
