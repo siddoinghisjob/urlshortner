@@ -52,14 +52,14 @@ export default async function URL({ params }) {
   const header = headers();
   const ip = (header.get("x-forwarded-for") ?? "127.0.0.1").split(",")[0];
 
-  let cName = await Promise.all([country(ip)]);
-  let url = await Promise.all([util(params.url, cName[0])]);
+  let cName = await Promise(country(ip));
+  let url = await Promise.all([util(params.url, cName)]);
 
   if (url[0] !== "") redirect("http://" + url[0]);
 
   return (
     <div className="flex-1 flex justify-center items-center text-3xl">
-      {ip} {cName[0]}
+      {ip} {cName}
       <p>{url[0] === "" ? "Error. Not Found." : "Redirecting to " + url[0]}</p>
     </div>
   );
