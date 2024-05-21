@@ -78,40 +78,6 @@ func Get(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, message{Text: url, Error: false})
 }
 
-func getId(url string) int {
-	re := regexp.MustCompile(`[A-Za-z]{2}(\d+)[A-Za-z]{2}`)
-
-	matches := re.FindStringSubmatch(url)
-
-	if len(matches) > 0 {
-		integerStr := matches[1]
-
-		number, err := strconv.Atoi(integerStr)
-		if err != nil {
-			fmt.Println("Error converting string to integer:", err)
-			return 0
-		}
-
-		return number
-	}
-
-	return 0
-}
-
-func Analytics(c *gin.Context) {
-	id := getId(c.Param("id"))
-
-	totalVisitors := getTotalVis(id)
-	countryData := getTotalCountry(id)
-	dateData := getTotalDate(id)
-
-	c.JSON(http.StatusOK, gin.H{
-		"total_visitors": totalVisitors,
-		"country_data":   countryData,
-		"date_data":      dateData,
-	})
-}
-
 func searchFromDB(surl string) (string, error) {
 	link, err := getFromRedis(surl)
 	_, notFoundErr := err.(*notFoundError)

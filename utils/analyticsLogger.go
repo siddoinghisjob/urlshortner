@@ -22,14 +22,15 @@ func (l *analyticsLogger) store(url, name, date string) {
 func (l *analyticsLogger) flush() {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
-
 	for _, v := range l.buffer {
-		err := setClicksInPG(v.url, v.name, v.date)
+		id, err := setClicksInPG(v.url, v.name, v.date)
 		if err != nil {
 			log.Fatal(fmt.Sprintln("Error registering data."))
+			continue
 		}
+
+		sendData(id, nil)
 	}
 
 	l.buffer = nil
-
 }
