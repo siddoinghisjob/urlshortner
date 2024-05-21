@@ -8,19 +8,18 @@ export default async function URL({ params }) {
   const country = async (ip) => {
     let msg;
     if (!ip || ip === "") {
-      msg = "No IP";
+      msg = "NA";
     }
 
     try {
-      const res = await fetch(process.env.COUNTRY_URL + "/" + ip, {
+      const res = await fetch(process.env.COUNTRY_API + "/" + ip, {
         method: "GET",
       });
       if (res.status !== 200) throw new Error();
       const json = await res.json();
       msg = json.country;
     } catch (e) {
-      console.log(e)
-      msg = "error";
+      msg = "NA"
     }
     return msg;
   };
@@ -30,7 +29,6 @@ export default async function URL({ params }) {
     if (!url || url === "") {
       msg = "";
     }
-    console.log(country);
 
     try {
       const res = await fetch(
@@ -60,7 +58,6 @@ export default async function URL({ params }) {
 
   return (
     <div className="flex-1 flex justify-center items-center text-3xl">
-      {ip} {cName[0]}
       <p>{url[0] === "" ? "Error. Not Found." : "Redirecting to " + url[0]}</p>
     </div>
   );
