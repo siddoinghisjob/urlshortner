@@ -3,9 +3,7 @@ package utils
 import (
 	"fmt"
 	"net/http"
-	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,33 +22,13 @@ func Logging(ticker *time.Ticker) {
 	}()
 }
 
-func trimURL(url *string) {
-	*url = strings.TrimPrefix(*url, "https://")
-	*url = strings.TrimPrefix(*url, "http://")
-	*url = strings.TrimPrefix(*url, "ftp://")
-	*url = strings.TrimPrefix(*url, "www.")
-}
-
-func isValidURL(str string) bool {
-	pattern := `^(?:https?|ftp):\/\/(?:www\.)?[\w\.-]+\.\w+(?:\/.*)?$`
-
-	regex := regexp.MustCompile(pattern)
-
-	return regex.MatchString(str)
-}
-
 func Post(c *gin.Context) {
 	var uLink urlLink
 	if err := c.BindJSON(&uLink); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, message{Text: "Format not correct.", Error: true})
 		return
 	}
-	fmt.Println(uLink.URL)
-	if !isValidURL(uLink.URL) {
-		c.IndentedJSON(http.StatusBadRequest, message{Text: "Format not correct.", Error: true})
-		return
-	}
-	trimURL(&uLink.URL)
+
 	surl, err := storeInDB(uLink.URL)
 	if err != nil {
 		fmt.Println(err)

@@ -17,7 +17,28 @@ export default function Analytics() {
     setLoading(true);
     setMsg(null);
 
-    const socket = new WebSocket(process.env.BACKEND_WS_URL + "/analytics/" + url);
+    let tmp = url;
+    if (tmp.startsWith(process.env.FRONTEND_URL + "/")) {
+      tmp = tmp.slice((process.env.FRONTEND_URL + "/").length);
+    } else {
+      setLoading(false);
+      setErr(true);
+      setMsg("Encountered Error. Wrong URL.");
+      return;
+    }
+    const pattern = /^[a-zA-Z]{2}\d+[a-zA-Z]{2}$/;
+    const isValid = pattern.test(tmp);
+
+    if (!isValid) {
+      setLoading(false);
+      setErr(true);
+      setMsg("Encountered Error. Wrong URL.");
+      return;
+    }
+
+    const socket = new WebSocket(
+      process.env.BACKEND_WS_URL + "/analytics/" + tmp
+    );
 
     socket.onopen = () => {
       setLoading(false);
@@ -45,7 +66,7 @@ export default function Analytics() {
     socket.onerror = (error) => {
       setLoading(false);
       setErr(true);
-      setMsg("Encountered Error.");
+      setMsg("Encountered Error. 3");
     };
 
     return () => {
@@ -87,22 +108,42 @@ export default function Analytics() {
       >
         {(err || loading) && (
           <div className="absolute top-0 bottom-0 left-0 right-0 backdrop-blur-[6px] bg-black bg-opacity-30 flex justify-center items-center text-3xl font-semibold w-full h-full rounded-3xl cur">
-            {err && <p className="bg-rose-50 p-2 rounded-2xl border-2 border-red-800 text-red-700">{msg}</p>}
-            {loading && <p className="bg-rose-50 p-2 rounded-2xl border-2 border-red-800 text-red-700">Loading..</p>}
+            {err && (
+              <p className="bg-rose-50 p-2 rounded-2xl border-2 border-red-800 text-red-700">
+                {msg}
+              </p>
+            )}
+            {loading && (
+              <p className="bg-rose-50 p-2 rounded-2xl border-2 border-red-800 text-red-700">
+                Loading..
+              </p>
+            )}
           </div>
         )}
         <div className="font-semibold text-3xl">Total Vistors: {total}</div>
         <div className="flex flex-wrap w-full gap-2 p-4">
           <div className="flex flex-col text-center border-2 flex-1 bg-slate-50 text-slate-900 p-5 rounded-2xl">
-            <p className="w-full font-semibold text-2xl">Top {country?.length} countries</p>
+            <p className="w-full font-semibold text-2xl">
+              Top {country?.length} countries
+            </p>
             <ul className="w-full flex flex-col">
-              {country?.map((el, key) => <li key={key} className="w-full"><u>{el.name}</u> : {el.data}</li>)}
+              {country?.map((el, key) => (
+                <li key={key} className="w-full">
+                  <u>{el.name}</u> : {el.data}
+                </li>
+              ))}
             </ul>
           </div>
           <div className="flex flex-col text-center border-2 flex-1 bg-slate-50 text-slate-900 p-5 rounded-2xl">
-            <p className="w-full font-semibold text-2xl">Top {date?.length} dates</p>
+            <p className="w-full font-semibold text-2xl">
+              Top {date?.length} dates
+            </p>
             <ul className="w-full flex flex-col justify-center">
-              {date?.map((el, key) => <li key={key} className="w-full"><u>{el.name}</u> : {el.data}</li>)}
+              {date?.map((el, key) => (
+                <li key={key} className="w-full">
+                  <u>{el.name}</u> : {el.data}
+                </li>
+              ))}
             </ul>
           </div>
         </div>
