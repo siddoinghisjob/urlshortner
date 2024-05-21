@@ -60,7 +60,7 @@ export default async function URL({ params }) {
 
   return (
     <div className="flex-1 flex justify-center items-center text-3xl">
-      {ip}
+      {ip} {cName}
       <p>{url[0] === "" ? "Error. Not Found." : "Redirecting to " + url[0]}</p>
     </div>
   );
