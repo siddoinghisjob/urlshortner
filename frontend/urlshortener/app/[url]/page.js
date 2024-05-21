@@ -8,7 +8,7 @@ export default async function URL({ params }) {
   const country = async (ip) => {
     let msg;
     if (!ip || ip === "") {
-      msg = "NA";
+      msg = "No IP";
     }
 
     try {
@@ -17,10 +17,9 @@ export default async function URL({ params }) {
       });
       if (res.status !== 200) throw new Error();
       const json = await res.json();
-      if (json.error) throw new Error();
       msg = json.country;
     } catch (e) {
-      msg = "NA";
+      msg = e;
     }
     return msg;
   };
