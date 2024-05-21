@@ -82,29 +82,36 @@ func getFromPg(link string) (string, error) {
 	return "", &internalError{"Internal Error"}
 }
 
-func setClicksInPG(url string, name string, date string) (int, error) {
+func setClicksInPG(url string, name string, date string) (string, error) {
 	cid, err := setCountryInPG(name)
 
 	if err != nil {
-		return 0, &internalError{}
+		return "", &internalError{}
 	}
 	var uid int
-	err = DB.QueryRow("SELECT id FROM urls WHERE link = $1", url).Scan(&uid)
+	var surl string
 
+	err = DB.QueryRow("SELECT id FROM urls WHERE link = $1", url).Scan(&uid)
 	if err == sql.ErrNoRows {
-		return 0, nil
+		return "", nil
 	}
+
 	if err != nil {
-		return 0, &internalError{}
+		return "", &internalError{}
+	}
+	err = DB.QueryRow("SELECT surl FROM surls WHERE uid = $1", uid).Scan(&surl)
+
+	if err != nil {
+		return "", &internalError{}
 	}
 
 	_, err = DB.Exec("INSERT INTO clicks (uid, cid, date) VALUES ($1,$2,$3) returning id", uid, cid, date)
 
 	if err != nil {
-		return 0, &internalError{}
+		return "", &internalError{}
 	}
 
-	return uid, nil
+	return surl, nil
 }
 
 func setCountryInPG(name string) (int8, error) {
@@ -127,14 +134,19 @@ func setCountryInPG(name string) (int8, error) {
 	return id, nil
 }
 
-func getTotalVis(id int) int {
-	var totalVisitors int
-	err := DB.QueryRow("SELECT COUNT(*) FROM clicks WHERE uid = $1", id).Scan(&totalVisitors)
+func getTotalVis(surl string) (int, int) {
+	var totalVisitors, id int
 
+	err := DB.QueryRow("SELECT uid FROM surls WHERE surl = $1", surl).Scan(&id)
 	if err != nil {
-		return 0
+		return -1, -1
 	}
-	return totalVisitors
+
+	err = DB.QueryRow("SELECT COUNT(*) FROM clicks WHERE uid = $1", id).Scan(&totalVisitors)
+	if err != nil {
+		return -1, -1
+	}
+	return totalVisitors, id
 }
 
 func getTotalCountry(id int) (countryData []analyticsData) {

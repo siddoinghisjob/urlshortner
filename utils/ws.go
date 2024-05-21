@@ -2,11 +2,8 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"regexp"
-	"strconv"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -21,38 +18,41 @@ var upgrader = websocket.Upgrader{
 
 var connections = struct {
 	sync.RWMutex
-	list map[int][]*websocket.Conn
-}{list: make(map[int][]*websocket.Conn)}
+	list map[string][]*websocket.Conn
+}{list: make(map[string][]*websocket.Conn)}
 
-func getId(url string) int {
-	re := regexp.MustCompile(`[A-Za-z]{2}(\d+)[A-Za-z]{2}`)
-
-	matches := re.FindStringSubmatch(url)
-
-	if len(matches) > 0 {
-		integerStr := matches[1]
-
-		number, err := strconv.Atoi(integerStr)
-		if err != nil {
-			fmt.Println("Error converting string to integer:", err)
-			return 0
+func sendWS(v []byte, ws []*websocket.Conn) {
+	connections.RLock()
+	defer connections.RUnlock()
+	for _, w := range ws {
+		if err := w.WriteMessage(websocket.TextMessage, v); err != nil {
+			log.Println("WriteMessage error on initial data:", err)
+			w.Close()
+			go removeConn(w)
 		}
-
-		return number
 	}
-
-	return 0
 }
 
-func sendData(id int, ws []*websocket.Conn) {
+func sendData(url string, ws []*websocket.Conn) {
 	if ws == nil {
-		tmp, ok := connections.list[id]
+		tmp, ok := connections.list[url]
 		if !ok {
 			return
 		}
 		ws = tmp
 	}
-	totalVisitors := getTotalVis(id)
+	totalVisitors, id := getTotalVis(url)
+	if totalVisitors == -1 {
+		mp := make(map[string]bool)
+		mp["error"] = true
+		jdata, err := json.Marshal(mp)
+		if err != nil {
+			return
+		}
+		sendWS(jdata, ws)
+		return
+	}
+
 	countryData := getTotalCountry(id)
 	dateData := getTotalDate(id)
 
@@ -66,15 +66,7 @@ func sendData(id int, ws []*websocket.Conn) {
 		return
 	}
 
-	connections.RLock()
-	defer connections.RUnlock()
-	for _, w := range ws {
-		if err := w.WriteMessage(websocket.TextMessage, jdata); err != nil {
-			log.Println("WriteMessage error on initial data:", err)
-			w.Close()
-			go removeConn(w)
-		}
-	}
+	sendWS(jdata, ws)
 }
 
 func Analytics(c *gin.Context) {
@@ -85,13 +77,13 @@ func Analytics(c *gin.Context) {
 	}
 
 	url := c.Param("id")
-	id := getId(url)
+
 	go func() {
-		sendData(id, []*websocket.Conn{ws})
+		sendData(url, []*websocket.Conn{ws})
 	}()
 
 	connections.Lock()
-	connections.list[id] = append(connections.list[id], ws)
+	connections.list[url] = append(connections.list[url], ws)
 	connections.Unlock()
 }
 

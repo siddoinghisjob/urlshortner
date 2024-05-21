@@ -23,13 +23,13 @@ func (l *analyticsLogger) flush() {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
 	for _, v := range l.buffer {
-		id, err := setClicksInPG(v.url, v.name, v.date)
+		surl, err := setClicksInPG(v.url, v.name, v.date)
 		if err != nil {
 			log.Fatal(fmt.Sprintln("Error registering data."))
 			continue
 		}
 
-		sendData(id, nil)
+		sendData(surl, nil)
 	}
 
 	l.buffer = nil
