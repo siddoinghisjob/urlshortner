@@ -56,10 +56,11 @@ export default async function URL({ params }) {
   let cName = await Promise.all([country(ip)]);
   let url = await Promise.all([util(params.url, cName)]);
 
-  if(url[0]!=="") redirect(url[0])
+  if (url[0] !== "") redirect("http://" + url[0]);
 
   return (
     <div className="flex-1 flex justify-center items-center text-3xl">
+      {ip}
       <p>{url[0] === "" ? "Error. Not Found." : "Redirecting to " + url[0]}</p>
     </div>
   );
