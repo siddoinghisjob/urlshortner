@@ -117,3 +117,7 @@ func storeInDB(link string) (string, error) {
 
 	return "", &internalError{}
 }
+
+func Healthz(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, gin.H{"success": true})
+}

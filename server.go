@@ -28,6 +28,7 @@ func setupAPI() {
 	router.Use(gin.Recovery())
 	router.Use(cors.Default())
 
+	router.GET("/healthz", utils.Healthz)
 	router.POST("/url", utils.Post)
 	router.GET("/url/:id", utils.Get)
 	router.GET("/analytics/:id", utils.Analytics)
