@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <main className=" w-full h-full min-h-screen flex flex-col justify-between">
           <h1
-            className={`text-5xl bg-slate-900 p-5 rounded-b-xl text-center w-full shadow-2xl text-slate-50 ${font.className} font-bold`}
+            className={`text-5xl mb-5 bg-slate-900 p-5 rounded-b-xl text-center w-full shadow-2xl text-slate-50 ${font.className} font-bold`}
           >
             Shortly
           </h1>

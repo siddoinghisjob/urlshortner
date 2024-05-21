@@ -65,10 +65,14 @@ func sendData(id int, ws []*websocket.Conn) {
 	if err != nil {
 		return
 	}
+
+	connections.RLock()
+	defer connections.RUnlock()
 	for _, w := range ws {
 		if err := w.WriteMessage(websocket.TextMessage, jdata); err != nil {
 			log.Println("WriteMessage error on initial data:", err)
-			return
+			w.Close()
+			go removeConn(w)
 		}
 	}
 }
