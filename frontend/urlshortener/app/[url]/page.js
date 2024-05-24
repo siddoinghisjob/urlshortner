@@ -19,7 +19,7 @@ export default async function URL({ params }) {
       const json = await res.json();
       msg = json.country;
     } catch (e) {
-      msg = "NA"
+      msg = "NA";
     }
     return msg;
   };
@@ -54,7 +54,12 @@ export default async function URL({ params }) {
   let cName = await Promise.all([country(ip)]);
   let url = await Promise.all([util(params.url, cName[0])]);
 
-  if (url[0] !== "") redirect("http://" + url[0]);
+  if (url[0] !== "") {
+    let turl;
+    if (url[0].startsWith("http")) turl = url[0];
+    else turl = "http://" + url[0];
+    redirect(turl);
+  }
 
   return (
     <div className="flex-1 flex justify-center items-center text-3xl">
