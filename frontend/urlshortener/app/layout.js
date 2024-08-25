@@ -28,13 +28,7 @@ export default function RootLayout({ children }) {
           {children}
           <div className="w-full justify-center bg-black items-center flex flex-wrap gap-3 text-white p-5 h-full border-t-2">
             Made with{" "}
-            <p className="text-rose-500 font-bold text-xl">&hearts;</p> by{" "}
-            <Link
-              href="https://github.io/siddoinghisjob"
-              className="underline decoration-dotted"
-            >
-              Soumya Deep Sarkar
-            </Link>
+            <p className="text-rose-500 font-bold text-xl">&hearts;</p>
           </div>
         </main>
       </body>
